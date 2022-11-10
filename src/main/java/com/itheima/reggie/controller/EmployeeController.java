@@ -121,5 +121,33 @@ public class EmployeeController {
         return R.success(pageInfo);
     }
 
+    /**
+     * 根据ID修改员工信息
+     * @param employee
+     * @return
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request, @RequestBody Employee employee){
+        Long employeeId = (Long)request.getSession().getAttribute("employee");
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(employeeId);
+        employeeService.updateById(employee);
+        return R.success("员工信息更新成功");
+    }
+
+    /**
+     * 根据Id查询员工信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<Employee> getById(@PathVariable Long id){
+        Employee employee = employeeService.getById(id);
+        if(null != employee){
+            return R.success(employee);
+        }
+        return R.error("没有查询到对应员工信息");
+    }
+
 
 }
