@@ -18,7 +18,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public class GlobalExceptionHandler {
 
     /**
-     * 异常处理方法 违反了数据库的唯一约束条
+     * 异常处理方法 违反了数据库的唯一约束条件
      * @return
      */
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
@@ -29,6 +29,17 @@ public class GlobalExceptionHandler {
             String msg = s[2] + "已存在";
             return R.error(msg);
         }
-        return R.error("违反数据库唯一约束，数据库更新失败");
+//        return R.error("违反数据库唯一约束，数据库更新失败");
+        return R.error("未知错误");
+    }
+
+    /**
+     * 异常处理方法 分类删除异常
+     * @return
+     */
+    @ExceptionHandler(CustomException.class)
+    public R<String> exceptionHandler(CustomException ex){
+        log.error(ex.getMessage());
+        return R.error(ex.getMessage());
     }
 }
