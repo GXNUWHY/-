@@ -20,3 +20,6 @@ mybatis-plus:
       id-type: ASSIGN_ID
 reggie:
   path: E:\ruijiwaimaiceshi\
+logging:
+  level:
+    root: info

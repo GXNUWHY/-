@@ -37,7 +37,9 @@ public class LoginCheckFilter implements Filter {
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                "/common/**"
+                "/common/**",
+                "/user/sendMsg",
+                "/user/login"
         };
 
         //判断 本次请求是否需要处理
@@ -52,7 +54,7 @@ public class LoginCheckFilter implements Filter {
 
         //判断登录状态， 如果已经登录，则直接放行
         if(null != request.getSession().getAttribute("employee")){
-            log.info("已登录，用户id：{}", request.getSession().getAttribute("employee"));
+            log.info("已登录，employee用户id：{}", request.getSession().getAttribute("employee"));
 
             log.warn("线程id{}", Thread.currentThread().getId());
 
@@ -62,8 +64,23 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request, response);
             return ;
         }
+        log.info("用户未登录，employee用户id：{}", request.getSession().getAttribute("employee"));
 
-        log.info("用户未登录，用户id：{}", request.getSession().getAttribute("employee"));
+        //判断登录状态， 如果已经登录，则直接放行
+        if(null != request.getSession().getAttribute("user")){
+            log.info("已登录，user用户id：{}", request.getSession().getAttribute("user"));
+
+            log.warn("线程id{}", Thread.currentThread().getId());
+
+            Long userId = (Long) request.getSession().getAttribute("user");
+            BaseContext.setCurrentId(userId);
+
+            filterChain.doFilter(request, response);
+            return ;
+        }
+
+        log.info("用户未登录，user用户id：{}", request.getSession().getAttribute("user"));
+
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
         return;
     }
