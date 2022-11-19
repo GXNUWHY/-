@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -89,6 +90,22 @@ public class SetmealController {
     public R<String> delete(@RequestParam List<Long> ids){
         setmealService.removeWithDish(ids);
         return R.success("套餐删除成功");
+    }
+
+    /**
+     * 根据条件查询套餐数据
+     * @param setmeal
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal){
+        LambdaQueryWrapper<Setmeal> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        lqw.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
+        lqw.orderByDesc(Setmeal::getUpdateTime);
+
+        List<Setmeal> list = setmealService.list(lqw);
+        return R.success(list);
     }
 
 }

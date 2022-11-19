@@ -6,6 +6,7 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
@@ -113,7 +114,7 @@ public class DishController {
      * @param dish
      * @return
      */
-    @GetMapping("/list")
+   /* @GetMapping("/list")
     public R<List<Dish>> list(Dish dish){
         //构造查询条件
         LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
@@ -126,6 +127,44 @@ public class DishController {
         List<Dish> list = dishService.list(lqw);
 
         return R.success(list);
+    }*/
+
+    @GetMapping("/list")
+    public R<List<DishDto>> list(Dish dish){
+        //构造查询条件
+        LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
+
+        lqw.eq(Dish::getStatus, 1);//起售状态的菜品
+        lqw.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //添加排序条件
+        lqw.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+
+        List<Dish> list = dishService.list(lqw);
+        List<DishDto> dishDtoList = list.stream().map((item)->{
+            DishDto dishDto = new DishDto();
+
+            BeanUtils.copyProperties(item, dishDto);
+
+            Long categoryId = item.getCategoryId();//分类id
+            Category category = categoryService.getById(categoryId);
+
+            log.warn("category"+ category.toString());
+
+            if(null != category){
+                String categoryName = category.getName();
+                dishDto.setCategoryName(categoryName);
+            }
+            Long dishId = item.getId();//菜品id
+            LambdaQueryWrapper<DishFlavor> lqw2 = new LambdaQueryWrapper<>();
+            lqw2.eq(DishFlavor::getDishId, dishId);
+            //select * from dish_flavor where dishid = ?
+            List<DishFlavor> dishFlavorList = dishFlavorService.list(lqw2);
+            dishDto.setFlavors(dishFlavorList);
+
+            return dishDto;
+        }).collect(Collectors.toList());
+
+        return R.success(dishDtoList);
     }
 
 }
